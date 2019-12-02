@@ -1,0 +1,6 @@
+django
+django-adminlte2
+pymongo
+black
+pylint
+apscheduler

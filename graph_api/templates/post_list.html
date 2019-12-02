@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load tags %}
+
+{% block extra_head %}
+    <style>
+        .pointer {cursor: pointer;}
+        img {
+            height: 50px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+    <div class="col-xs-12 col-md-4"><h2>Danh sách bài viết</h2></div>
+        <div class="col-xs-12 col-md-4" style="float: right;">
+            <div class="input-group pull-right">
+                <input type="text" class="form-control" placeholder="Tìm kiếm nội dung" />
+                <div class="input-group-btn">
+                    <button class="btn btn-primary" type="submit">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-body table-responsive">
+            <table class="table-hover table-condensed">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Nội dung</th>
+                        <th>Ngày tạo</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in post_list %}
+                        <tr class="pointer" name="{{ post.entry.0.changes.0.value.post_id }}">
+                            <td>{{ forloop.counter }}</td>
+                            {% if post.entry.0.changes.0.value.message %}
+                                <td>{{ post.entry.0.changes.0.value.message }}</td>
+                            {% elif post.entry.0.changes.0.value.photos %}
+                                <td>
+                                    {% for image in post.entry.0.changes.0.value.photos %}
+                                        <img style="display: inline;" src="{{ image }}" alt="This is photo." />
+                                    {% endfor %}
+                                </td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                            <td>{{ post.entry.0.changes.0.value.created_time|date_time }}</td>
+                            <td>{{ post.entry.0.changes.0.value.verb|verb }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if is_paginated %}
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page=1">&lt;&lt;</a></li>
+                        <li><a href="?page={{ page_obj.previous_page_number }}">&lt;</a></li>
+                    {% endif %}
+                        <li class="disabled"><a href="#">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</a></li>
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">&gt;</a></li>
+                        <li><a href="?page={{ page_obj.paginator.num_pages }}">&gt;&gt;</a></li>
+                    {% endif %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+{% include 'adminlte/lib/_scripts.html' %}
+    <script>
+        $(document).ready(function(){
+            // open post detail when click
+            $("tr").click(function(){
+                console.log($(this).attr('name'));
+                var post_id = $(this).attr('name');
+                window.location.href = "/posts/" + post_id;
+                // window.open("/posts/" + post_id);
+            });
+
+            // search
+            $("button").click(function(){
+                message = $("input").val();
+                if (message)
+                    window.location.href = "/posts?message=" + message;
+            });
+
+            
+            // set input value when search
+            var getUrlParameter = function getUrlParameter(sParam) {
+                var sPageURL = window.location.search.substring(1), sURLVariables = sPageURL.split('&'), sParameterName, i;
+
+                for (i = 0; i < sURLVariables.length; i++) {
+                    sParameterName = sURLVariables[i].split('=');
+
+                    if (sParameterName[0] === sParam) {
+                        return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                    }
+                }
+            };
+            var message = getUrlParameter("message");
+            if (message)
+                $("input").val(message);
+        });
+    </script>
+{% endblock %}

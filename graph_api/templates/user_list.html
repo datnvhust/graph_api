@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load tags %}
+
+{% block content %}
+    <div class="row">
+    <div class="col-xs-12 col-md-4"><h2>Danh sách người dùng</h2></div>
+        <div class="col-xs-12 col-md-4" style="float: right;">
+            <div class="input-group pull-right">
+                <input type="text" class="form-control" placeholder="Tìm kiếm" />
+                <div class="input-group-btn">
+                    <button class="btn btn-primary" type="submit">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-body table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên người dùng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in user_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ user.name }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if is_paginated %}
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page=1">&lt;&lt;</a></li>
+                        <li><a href="?page={{ page_obj.previous_page_number }}">&lt;</a></li>
+                    {% endif %}
+                        <li class="disabled"><a href="#">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</a></li>
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">&gt;</a></li>
+                        <li><a href="?page={{ page_obj.paginator.num_pages }}">&gt;&gt;</a></li>
+                    {% endif %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+{% include 'adminlte/lib/_scripts.html' %}
+    <script>
+        $(document).ready(function(){
+            // search
+            $("button").click(function(){
+                name = $("input").val();
+                if (name)
+                    window.location.href = "/users?name=" + name;
+            });
+            // set input value when search
+            var getUrlParameter = function getUrlParameter(sParam) {
+                var sPageURL = window.location.search.substring(1), sURLVariables = sPageURL.split('&'), sParameterName, i;
+
+                for (i = 0; i < sURLVariables.length; i++) {
+                    sParameterName = sURLVariables[i].split('=');
+
+                    if (sParameterName[0] === sParam) {
+                        return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                    }
+                }
+            };
+            var name = getUrlParameter("name");
+            if (name)
+                $("input").val(name);
+        });
+    </script>
+{% endblock %}

@@ -1,10 +1,21 @@
-from django.http import JsonResponse
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.views.generic import DetailView, ListView
-from pymongo import MongoClient
-from django.contrib.auth.mixins import LoginRequiredMixin
 
 from utils.db_connect import get_collection
+
+
+def register(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect("/login")
+    else:
+        form = UserCreationForm
+    return render(request, "register.html", {"form": form})
 
 
 def sort_by_key(val):
@@ -42,11 +53,9 @@ class PostListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         message = self.request.GET.get("message", "")
         if message:
-            queryset_find = self.col.find(
-                {"entry.changes.value.message": {"$regex": message}}
-            ).sort("_id", -1)
+            queryset_find = self.col.find({"entry.changes.value.message": {"$regex": message}})
         else:
-            queryset_find = self.col.find().sort("_id", -1)
+            queryset_find = self.col.find()
         return queryset_last(list(queryset_find), "post_id")
 
 
@@ -59,15 +68,9 @@ class PostDetailView(LoginRequiredMixin, ListView):
         col = get_collection("feeds_van_comments")
         message = self.request.GET.get("message", "")
         if message:
-            queryset_find = col.find({"entry.changes.value.message": {"$regex": message}}).sort(
-                "_id", -1
-            )
-
+            queryset_find = col.find({"entry.changes.value.message": {"$regex": message}})
         else:
-            queryset_find = col.find({"entry.changes.value.post_id": self.kwargs["post_id"]}).sort(
-                "_id", -1
-            )
-
+            queryset_find = col.find({"entry.changes.value.post_id": self.kwargs["post_id"]})
         return queryset_last(list(queryset_find), "comment_id")
 
     def get_context_data(self, **kwargs):

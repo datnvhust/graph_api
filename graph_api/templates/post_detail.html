@@ -118,8 +118,9 @@
                 var message = $("input").val();
                 if (message)
                     window.location.href = "/posts/{{ post.entry.0.changes.0.value.post_id }}?message=" + message;
+                else
+                    window.location.href = "/posts/{{ post.entry.0.changes.0.value.post_id }}"
             });
-
             
             // set input value when search
             var getUrlParameter = function getUrlParameter(sParam) {

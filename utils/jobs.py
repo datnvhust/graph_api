@@ -1,4 +1,4 @@
-from .collections import get_collection
+from .db_connect import get_collection
 import time
 
 col = get_collection("feeds_van")

@@ -3,7 +3,9 @@
 
 {% block extra_head %}
     <style>
-        .pointer {cursor: pointer;}
+        .pointer {
+            cursor: pointer;
+        }
         img {
             height: 50px;
         }
@@ -12,12 +14,14 @@
 
 {% block content %}
     <div class="row">
-    <div class="col-xs-12 col-md-4"><h2>Danh sách bài viết</h2></div>
+        <div class="col-xs-12 col-md-4">
+            <h2>Danh sách bài viết</h2>
+        </div>
         <div class="col-xs-12 col-md-4" style="float: right;">
             <div class="input-group pull-right">
-                <input type="text" class="form-control" placeholder="Tìm kiếm nội dung" />
+                <input id="search-input"type="text" class="form-control" placeholder="Tìm kiếm nội dung" />
                 <div class="input-group-btn">
-                    <button class="btn btn-primary" type="submit">
+                    <button id="search-btn" class="btn btn-primary" type="submit">
                         <span class="glyphicon glyphicon-search"></span>
                     </button>
                 </div>
@@ -25,19 +29,32 @@
         </div>
     </div>
     <div class="panel panel-default">
-        <div class="panel-body table-responsive">
+        <div class="panel-body table-responsive" style="min-height: 200px;">
             <table class="table table-hover table-condensed">
                 <thead>
                     <tr>
                         <th>STT</th>
                         <th>Nội dung</th>
                         <th>Ngày tạo</th>
-                        <th>Hành động</th>
+                        <th>
+                            <div class="dropdown">
+                                <button style="color: black; padding: 0; font-weight: bold; text-decoration: none;" class="btn btn-link dropdown-toggle" type="button" data-toggle="dropdown">Hành động
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="/posts">Tất cả</a></li>
+                                    <li><a href="/posts?verb=add">Thêm</a></li>
+                                    <li><a href="/posts?verb=edited">Sửa</a></li>
+                                    <li><a href="/posts?verb=remove">Xóa</a></li>
+                                    <li><a href="/posts?verb=hide">Ẩn</a></li>
+                                </ul>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for post in post_list %}
-                        <tr class="pointer" name="{{ post.entry.0.changes.0.value.post_id }}">
+                        <tr class="pointer post-tr" name="{{ post.entry.0.changes.0.value.post_id }}">
                             <td>{{ forloop.counter }}</td>
                             {% if post.entry.0.changes.0.value.message %}
                                 <td>{{ post.entry.0.changes.0.value.message }}</td>
@@ -74,20 +91,20 @@
 {% endblock %}
 
 {% block javascript %}
-{% include 'adminlte/lib/_scripts.html' %}
+    {% include 'libs/_scripts.html' %}
     <script>
         $(document).ready(function(){
             // open post detail when click
-            $("tr").click(function(){
-                console.log($(this).attr('name'));
+            $(".post-tr").click(function(){
                 var post_id = $(this).attr('name');
                 window.location.href = "/posts/" + post_id;
                 // window.open("/posts/" + post_id);
             });
 
             // search
-            $("button").click(function(){
-                message = $("input").val();
+            $("#search-btn").click(function(){
+                message = $("#search-input").val();
+                console.log(message);
                 if (message)
                     window.location.href = "/posts?message=" + message;
                 else
@@ -109,7 +126,7 @@
             };
             var message = getUrlParameter("message");
             if (message)
-                $("input").val(message);
+                $("#search-input").val(message);
         });
     </script>
 {% endblock %}

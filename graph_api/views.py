@@ -52,8 +52,20 @@ class PostListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         message = self.request.GET.get("message", "")
-        if message:
+        verb = self.request.GET.get("verb", "")
+        if message and verb:
+            queryset_find = self.col.find(
+                {
+                    "$and": [
+                        {"entry.changes.value.message": {"$regex": message}},
+                        {"entry.changes.value.verb": verb},
+                    ]
+                }
+            )
+        elif message and not verb:
             queryset_find = self.col.find({"entry.changes.value.message": {"$regex": message}})
+        elif not message and verb:
+            queryset_find = self.col.find({"entry.changes.value.verb": verb})
         else:
             queryset_find = self.col.find()
         return queryset_last(list(queryset_find), "post_id")
@@ -67,8 +79,35 @@ class PostDetailView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         col = get_collection("feeds_van_comments")
         message = self.request.GET.get("message", "")
-        if message:
-            queryset_find = col.find({"entry.changes.value.message": {"$regex": message}})
+        verb = self.request.GET.get("verb", "")
+        if message and verb:
+            queryset_find = col.find(
+                {
+                    "$and": [
+                        {"entry.changes.value.message": {"$regex": message}},
+                        {"entry.changes.value.verb": verb},
+                        {"entry.changes.value.post_id": self.kwargs["post_id"]},
+                    ]
+                }
+            )
+        elif message and not verb:
+            queryset_find = col.find(
+                {
+                    "$and": [
+                        {"entry.changes.value.message": {"$regex": message}},
+                        {"entry.changes.value.post_id": self.kwargs["post_id"]},
+                    ]
+                }
+            )
+        elif not message and verb:
+            queryset_find = col.find(
+                {
+                    "$and": [
+                        {"entry.changes.value.verb": verb},
+                        {"entry.changes.value.post_id": self.kwargs["post_id"]},
+                    ]
+                }
+            )
         else:
             queryset_find = col.find({"entry.changes.value.post_id": self.kwargs["post_id"]})
         return queryset_last(list(queryset_find), "comment_id")

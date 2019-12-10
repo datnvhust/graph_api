@@ -1,36 +1,11 @@
 {% extends 'base.html' %}
 {% load tags %}
 
-{% block extra_head %}
-    <style>
-        .pointer {
-            cursor: pointer;
-        }
-        img {
-            height: 50px;
-        }
-    </style>
-{% endblock %}
-
 {% block content %}
-    <div class="row">
-        <div class="col-xs-12 col-md-4">
-            <h2>Danh sách bài viết</h2>
-        </div>
-        <div class="col-xs-12 col-md-4" style="float: right;">
-            <div class="input-group pull-right">
-                <input id="search-input"type="text" class="form-control" placeholder="Tìm kiếm nội dung" />
-                <div class="input-group-btn">
-                    <button id="search-btn" class="btn btn-primary" type="submit">
-                        <span class="glyphicon glyphicon-search"></span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <h2>Danh sách bài viết</h2>
     <div class="panel panel-default">
         <div class="panel-body table-responsive" style="min-height: 200px;">
-            <table class="table table-hover table-condensed">
+            <table id="post-table" class="table table-hover table-condensed" style="width:100%">
                 <thead>
                     <tr>
                         <th>STT</th>
@@ -73,60 +48,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-            {% if is_paginated %}
-                <ul class="pagination">
-                    {% if page_obj.has_previous %}
-                        <li><a href="?page=1">&lt;&lt;</a></li>
-                        <li><a href="?page={{ page_obj.previous_page_number }}">&lt;</a></li>
-                    {% endif %}
-                        <li class="disabled"><a href="#">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</a></li>
-                    {% if page_obj.has_next %}
-                        <li><a href="?page={{ page_obj.next_page_number }}">&gt;</a></li>
-                        <li><a href="?page={{ page_obj.paginator.num_pages }}">&gt;&gt;</a></li>
-                    {% endif %}
-                </ul>
-            {% endif %}
         </div>
     </div>
-{% endblock %}
-
-{% block javascript %}
-    {% include 'libs/_scripts.html' %}
-    <script>
-        $(document).ready(function(){
-            // open post detail when click
-            $(".post-tr").click(function(){
-                var post_id = $(this).attr('name');
-                window.location.href = "/posts/" + post_id;
-                // window.open("/posts/" + post_id);
-            });
-
-            // search
-            $("#search-btn").click(function(){
-                message = $("#search-input").val();
-                console.log(message);
-                if (message)
-                    window.location.href = "/posts?message=" + message;
-                else
-                    window.location.href = "/posts"
-            });
-
-            
-            // set input value when search
-            var getUrlParameter = function getUrlParameter(sParam) {
-                var sPageURL = window.location.search.substring(1), sURLVariables = sPageURL.split('&'), sParameterName, i;
-
-                for (i = 0; i < sURLVariables.length; i++) {
-                    sParameterName = sURLVariables[i].split('=');
-
-                    if (sParameterName[0] === sParam) {
-                        return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
-                    }
-                }
-            };
-            var message = getUrlParameter("message");
-            if (message)
-                $("#search-input").val(message);
-        });
-    </script>
 {% endblock %}

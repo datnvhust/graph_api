@@ -4,6 +4,29 @@
     Facebook Management
 {% endblock %}
 
+{% block stylesheets %}
+    {% include 'adminlte/lib/_styles.html' %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+{% endblock %}
+
+{% block extra_head %}
+    <style>
+        .pointer {
+            cursor: pointer;
+        }
+        img {
+            height: 50px;
+        }
+        .overflow {
+            height: 60px;
+            overflow-y: auto;
+        }
+        .td_message {
+            width: 70%; 
+        }
+    </style>
+{% endblock %}
+
 {% block nav_header %}
     {% include 'libs/_main_header.html' %}
 {% endblock %}
@@ -14,4 +37,19 @@
 
 {% block breadcrumbs %}
     <button id="back" type="button" class="btn btn-link">&lt;&lt;Back</button>
+{% endblock %}
+
+{% block javascript %}
+    {% include 'libs/_scripts.html' %}
+    <script>
+        $(document).ready(function(){
+            $('#post-table').DataTable();
+        });
+
+        $(".post-tr").click(function(){
+            var post_id = $(this).attr('name');
+            window.location.href = "/posts/" + post_id;
+            // window.open("/posts/" + post_id);
+        });
+    </script>
 {% endblock %}

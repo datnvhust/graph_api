@@ -1,21 +1,6 @@
 {% extends 'base.html' %}
 {% load tags %}
 
-{% block extra_head %}
-    <style>
-        .overflow {
-            height: 60px;
-            overflow-y: auto;
-        }
-        .td_message {
-            width: 70%; 
-        }
-        img {
-            height: 50px;
-        }
-    </style>
-{% endblock %}
-
 {% block content %}
     <div class="panel-group">
         <h2>Chi tiết bài viết</h2>
@@ -56,42 +41,16 @@
             </div>
         </div>
         <br/>
-        <div class="row">
-            <div class="col-xs-12 col-md-8"><h2>Bình luận</h2></div>
-            
-            <div class="col-xs-12 col-md-4">
-                <div class="input-group">
-                    <input id="search-input" type="text" class="form-control" placeholder="Tìm kiếm nội dung" />
-                    <div class="input-group-btn">
-                        <button id="search-btn" class="btn btn-primary" type="submit">
-                            <span class="glyphicon glyphicon-search"></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <h2>Bình luận</h2>
         <div class="panel panel-default">
             <div class="panel-body table-responsive" style="min-height: 200px;">
-                <table class="table table-hover table-bordered table-condensed">
+                <table id="post-table" class="table table-hover table-bordered table-condensed" style="width:100%">
                     <thead>
                         <tr>
                             <th>Nội dung</th>
                             <th>Ngày tạo</th>
                             <th>Người tạo</th>
-                            <th>
-                            <div class="dropdown">
-                                <button style="color: black; padding: 0; font-weight: bold; text-decoration: none;" class="btn btn-link dropdown-toggle" type="button" data-toggle="dropdown">Hành động
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a href="/posts/{{ post.entry.0.changes.0.value.post_id }}">Tất cả</a></li>
-                                    <li><a href="/posts/{{ post.entry.0.changes.0.value.post_id }}?verb=add">Thêm</a></li>
-                                    <li><a href="/posts/{{ post.entry.0.changes.0.value.post_id }}?verb=edited">Sửa</a></li>
-                                    <li><a href="/posts/{{ post.entry.0.changes.0.value.post_id }}?verb=remove">Xóa</a></li>
-                                    <li><a href="/posts/{{ post.entry.0.changes.0.value.post_id }}?verb=hide">Ẩn</a></li>
-                                </ul>
-                            </div>
-                        </th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -105,53 +64,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if is_paginated %}
-                    <ul class="pagination">
-                        {% if page_obj.has_previous %}
-                            <li><a href="?page=1">&lt;&lt;</a></li>
-                            <li><a href="?page={{ page_obj.previous_page_number }}">&lt;</a></li>
-                        {% endif %}
-                            <li class="disabled"><a href="#">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</a></li>
-                        {% if page_obj.has_next %}
-                            <li><a href="?page={{ page_obj.next_page_number }}">&gt;</a></li>
-                            <li><a href="?page={{ page_obj.paginator.num_pages }}">&gt;&gt;</a></li>
-                        {% endif %}
-                    </ul>
-                {% endif %}
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block javascript %}
-{% include 'adminlte/lib/_scripts.html' %}
-    <script>
-        $(document).ready(function(){
-            // search
-            $("#search-btn").click(function(){
-                var message = $("#search-input").val();
-                console.log(message);
-                if (message)
-                    window.location.href = "/posts/{{ post.entry.0.changes.0.value.post_id }}?message=" + message;
-                else
-                    window.location.href = "/posts/{{ post.entry.0.changes.0.value.post_id }}"
-            });
-            
-            // set input value when search
-            var getUrlParameter = function getUrlParameter(sParam) {
-                var sPageURL = window.location.search.substring(1), sURLVariables = sPageURL.split('&'), sParameterName, i;
-
-                for (i = 0; i < sURLVariables.length; i++) {
-                    sParameterName = sURLVariables[i].split('=');
-
-                    if (sParameterName[0] === sParam) {
-                        return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
-                    }
-                }
-            };
-            var message = getUrlParameter("message");
-            if (message)
-                $("#search-input").val(message);
-        });
-    </script>
 {% endblock %}

@@ -47,69 +47,20 @@ def queryset_last(queryset_find, type_of_object):
 class PostListView(LoginRequiredMixin, ListView):
     context_object_name = "post_list"
     template_name = "post_list.html"
-    paginate_by = 10
     col = get_collection("feeds_van_posts")
 
     def get_queryset(self):
-        message = self.request.GET.get("message", "")
-        verb = self.request.GET.get("verb", "")
-        if message and verb:
-            queryset_find = self.col.find(
-                {
-                    "$and": [
-                        {"entry.changes.value.message": {"$regex": message}},
-                        {"entry.changes.value.verb": verb},
-                    ]
-                }
-            )
-        elif message and not verb:
-            queryset_find = self.col.find({"entry.changes.value.message": {"$regex": message}})
-        elif not message and verb:
-            queryset_find = self.col.find({"entry.changes.value.verb": verb})
-        else:
-            queryset_find = self.col.find()
+        queryset_find = self.col.find()
         return queryset_last(list(queryset_find), "post_id")
 
 
 class PostDetailView(LoginRequiredMixin, ListView):
     context_object_name = "comment_list"
     template_name = "post_detail.html"
-    paginate_by = 10
 
     def get_queryset(self):
         col = get_collection("feeds_van_comments")
-        message = self.request.GET.get("message", "")
-        verb = self.request.GET.get("verb", "")
-        if message and verb:
-            queryset_find = col.find(
-                {
-                    "$and": [
-                        {"entry.changes.value.message": {"$regex": message}},
-                        {"entry.changes.value.verb": verb},
-                        {"entry.changes.value.post_id": self.kwargs["post_id"]},
-                    ]
-                }
-            )
-        elif message and not verb:
-            queryset_find = col.find(
-                {
-                    "$and": [
-                        {"entry.changes.value.message": {"$regex": message}},
-                        {"entry.changes.value.post_id": self.kwargs["post_id"]},
-                    ]
-                }
-            )
-        elif not message and verb:
-            queryset_find = col.find(
-                {
-                    "$and": [
-                        {"entry.changes.value.verb": verb},
-                        {"entry.changes.value.post_id": self.kwargs["post_id"]},
-                    ]
-                }
-            )
-        else:
-            queryset_find = col.find({"entry.changes.value.post_id": self.kwargs["post_id"]})
+        queryset_find = col.find({"entry.changes.value.post_id": self.kwargs["post_id"]})
         return queryset_last(list(queryset_find), "comment_id")
 
     def get_context_data(self, **kwargs):
@@ -123,15 +74,10 @@ class PostDetailView(LoginRequiredMixin, ListView):
 class UserListView(LoginRequiredMixin, ListView):
     context_object_name = "user_list"
     template_name = "user_list.html"
-    paginate_by = 10
     col = get_collection("feeds_van_users")
 
     def get_queryset(self):
-        name = self.request.GET.get("name", "")
-        if name:
-            queryset = self.col.find({"name": {"$regex": name}}).sort("_id", -1)
-        else:
-            queryset = self.col.find().sort("_id", -1)
+        queryset = self.col.find().sort("_id", -1)
         return list(queryset)
 
 

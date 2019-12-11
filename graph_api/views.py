@@ -3,8 +3,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.views.generic import DetailView, ListView
-
+from django.contrib.auth import get_user_model
 from utils.db_connect import get_collection
+
+User = get_user_model()
 
 
 def register(request):
@@ -18,6 +20,7 @@ def register(request):
     return render(request, "register.html", {"form": form})
 
 
+"""
 def sort_by_key(val):
     return val["entry"][0]["changes"][0]["value"]["created_time"]
 
@@ -42,6 +45,7 @@ def queryset_last(queryset_find, type_of_object):
                 obj_id_list.append(obj_id)
 
     return queryset
+"""
 
 
 class PostListView(LoginRequiredMixin, ListView):
@@ -50,8 +54,26 @@ class PostListView(LoginRequiredMixin, ListView):
     col = get_collection("feeds_van_posts")
 
     def get_queryset(self):
-        queryset_find = self.col.find()
-        return queryset_last(list(queryset_find), "post_id")
+        query = list(self.col.find().sort("_id", -1))
+        queryset = []
+        post_id_list = []
+        col_feeds = get_collection("feeds")
+        for doc in col_feeds.find(
+            {
+                "$and": [
+                    {"entry.changes.value.item": {"$in": ["status", "comment"]}},
+                    {"sys_status": {"$exists": True}},
+                ]
+            }
+        ).sort("_id", -1):
+            post_id = doc["entry"][0]["changes"][0]["value"]["post_id"]
+            if post_id not in post_id_list:
+                for i in query:
+                    if i["entry"][0]["changes"][0]["value"]["post_id"] == post_id:
+                        queryset.append(i)
+
+                post_id_list.append(post_id)
+        return queryset
 
 
 class PostDetailView(LoginRequiredMixin, ListView):
@@ -59,9 +81,9 @@ class PostDetailView(LoginRequiredMixin, ListView):
     template_name = "post_detail.html"
 
     def get_queryset(self):
-        col = get_collection("feeds_van_comments")
-        queryset_find = col.find({"entry.changes.value.post_id": self.kwargs["post_id"]})
-        return queryset_last(list(queryset_find), "comment_id")
+        col = get_collection("feeds_van_cmts")
+        queryset = col.find({"entry.changes.value.post_id": self.kwargs["post_id"]}).sort("_id", -1)
+        return list(queryset)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -79,6 +101,25 @@ class UserListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = self.col.find().sort("_id", -1)
         return list(queryset)
+
+
+class AdminView(LoginRequiredMixin, ListView):
+    model = User
+    context_object_name = "users"
+    template_name = "managers/index.html"
+    form_class = UserCreationForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["form"] = self.form_class
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        print(form)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect("/managers")
 
 
 """

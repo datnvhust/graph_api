@@ -12,4 +12,5 @@ urlpatterns = [
     path("posts", views.PostListView.as_view()),
     path("posts/<str:post_id>", views.PostDetailView.as_view()),
     path("users", views.UserListView.as_view()),
+    path("managers", views.AdminView.as_view()),
 ]

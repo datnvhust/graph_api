@@ -10,7 +10,7 @@
                     <tr>
                         <th>STT</th>
                         <th>Tên người dùng</th>
-                        <th>Tùy chọn</th>
+                        <th>Trạng thái</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -19,10 +19,12 @@
                             <td>{{ forloop.counter }}</td>
                             <td>{{ user.name }}</td>
                             <td>
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-warning btn-block-user" name="{{ user.id }}">Block</button>
-                                    <button type="button" class="btn btn-info btn-unblock-user" name="{{ user.id }}">Unblock</button>
-                                </div>
+                                {% if user.sys_status == "unblock" %}
+                                    <button type="button" class="btn btn-warning btn-block-user" name="{{ user.id }}" username="{{ user.name }}">Block</button>
+                                {% endif %}
+                                {% if user.sys_status == "block" %}
+                                    <button type="button" class="btn btn-warning btn-unblock-user" name="{{ user.id }}" username="{{ user.name }}">Unblock</button>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -30,4 +32,57 @@
             </table>
         </div>
     </div>
+{% endblock %}
+
+{% block javascript %}
+    {% include 'libs/_scripts.html' %}
+    <script>
+        $(document).ready(function(){
+            $('#post-table').DataTable();
+
+            $(".btn-block-user").click(function(){
+                var user_id = $(this).attr('name'); 
+                var username = $(this).attr('username');
+                $.ajax({
+                    type: 'POST',
+                    url: "https://ftool.ftech.ai/api/Facebook/blockUser",
+                    headers: {
+                        "client_id": "1",
+                        "client_secret":"c7c3f8c507a919a73d1389818ab3bde8"
+                    },
+                    data: {
+                        "userid": user_id
+                    },
+                    success: function(response) {
+                        $.get("/block-user?user_id=" + user_id + "&action=block", function(data, status){
+                            alert("You blocked user: " + username);
+                            window.location.reload(); 
+                        });
+                    }
+                })
+            });
+
+            $(".btn-unblock-user").click(function(){
+                var user_id = $(this).attr('name');
+                var username = $(this).attr('username');
+                $.ajax({
+                    type: 'POST',
+                    url: "https://ftool.ftech.ai/api/Facebook/unblockUser",
+                    headers: {
+                        "client_id": "1",
+                        "client_secret":"c7c3f8c507a919a73d1389818ab3bde8"
+                    },
+                    data: {
+                        "userid": user_id
+                    },
+                    success: function(response) {
+                        $.get("/block-user?user_id=" + user_id + "&action=unblock", function(data, status){
+                            alert("You unblocked user: " + username);
+                            window.location.reload(); 
+                        });
+                    }
+                })
+            });
+        });
+    </script>
 {% endblock %}

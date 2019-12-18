@@ -37,6 +37,8 @@ def filter_data():
         user_id = doc["entry"][0]["changes"][0]["value"]["from"]["id"]
         if not user_exist(user_id, col_user):
             col_user.insert_one(doc["entry"][0]["changes"][0]["value"]["from"])
+            q_ = {"id": doc["entry"][0]["changes"][0]["value"]["from"]["id"]}
+            col_user.update_one(q_, {"$set": {"sys_status": "unblock"}})
 
         if doc["entry"][0]["changes"][0]["value"]["item"] == "status":
             col = get_collection("feeds_van_posts")

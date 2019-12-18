@@ -65,13 +65,23 @@
                                 <td>{{ comment.entry.0.changes.0.value.verb|verb }}</td>
                                 <td style="min-width: 90px;">
                                     <div class="btn-group">
-                                        <button type="button" class="btn btn-primary btn-open-modal" name="{{ comment.entry.0.changes.0.value.comment_id }}">Reply</button>
+                                        <button type="button" class="btn btn-primary btn-open-modal" 
+                                        name="{{ comment.entry.0.changes.0.value.comment_id }}"
+                                        message="{{ comment.entry.0.changes.0.value.message }}"
+                                        from="{{ comment.entry.0.changes.0.value.from.name }}"
+                                        >Reply</button>
                                         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
                                             <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu" role="menu">
-                                            <li><a href="javascript:void(0);" class="btn-hide-cmt" name="{{ comment.entry.0.changes.0.value.comment_id }}">Hide</a></li>
-                                            <li><a href="javascript:void(0);" class="btn-delete-cmt" name="{{ comment.entry.0.changes.0.value.comment_id }}">Delete</a></li>
+                                            <li><a href="javascript:void(0);" class="btn-hide-cmt" 
+                                            name="{{ comment.entry.0.changes.0.value.comment_id }}"
+                                            message="{{ comment.entry.0.changes.0.value.message }}"
+                                            >Hide</a></li>
+                                            <li><a href="javascript:void(0);" class="btn-delete-cmt" 
+                                            name="{{ comment.entry.0.changes.0.value.comment_id }}"
+                                            message="{{ comment.entry.0.changes.0.value.message }}"
+                                            >Delete</a></li>
                                         </ul>
                                     </div>
                                 </td>
@@ -92,8 +102,16 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="comment">Message:</label>
-                        <textarea class="form-control" rows="3" id="message" required></textarea>
+                        <label for="from-cmt">From:</label>
+                        <div id="from-cmt"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="message-cmt">Message:</label>
+                        <div id="message-cmt"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="message-reply">Reply:</label>
+                        <textarea class="form-control" rows="3" id="message-reply" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -103,4 +121,81 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascript %}
+    {% include 'libs/_scripts.html' %}
+    <script>
+        $(document).ready(function(){
+            $('#post-table').DataTable();
+
+            $(".btn-delete-cmt").click(function(){
+                var message_delete = $(this).attr('message');
+                var result = confirm("Bạn có muốn xáo comment có nội dung: " + message_delete);
+                if (result) {
+                    $.ajax({
+                        type: 'POST',
+                        url: "https://ftool.ftech.ai/api/Facebook/delCmt",
+                        headers: {
+                            "client_id": "1",
+                            "client_secret":"c7c3f8c507a919a73d1389818ab3bde8"
+                        },
+                        data: {
+                            "commentID": $(this).attr('name')
+                        },
+                        success: function(response) {
+                            alert("You deleted comment: " + message_delete);
+                            location.reload();
+                        }
+                    })
+                }
+            });
+
+            $(".btn-hide-cmt").click(function(){
+                var message_hide = $(this).attr('message');
+                $.ajax({
+                    type: 'POST',
+                    url: "https://ftool.ftech.ai/api/Facebook/hideCmt",
+                    headers: {
+                        "client_id": "1",
+                        "client_secret":"c7c3f8c507a919a73d1389818ab3bde8"
+                    },
+                    data: {
+                        "commentID": $(this).attr('name')
+                    },
+                    success: function(response) {
+                        alert("You hided comment: " + message_hide);
+                        location.reload();
+                    }
+                })
+            });
+
+            var cmt_id = "";
+            $(".btn-open-modal").click(function(){
+                cmt_id = $(this).attr('name');
+                $("#myModal").modal();
+                document.getElementById("message-cmt").innerHTML = $(this).attr('message');
+                document.getElementById("from-cmt").innerHTML = $(this).attr('from');
+            });
+
+            $(".btn-reply-cmt").click(function(){
+                $.ajax({
+                    type: 'POST',
+                    url: "https://ftool.ftech.ai/api/Facebook/replyCmt",
+                    headers: {
+                        "client_id": "1",
+                        "client_secret":"c7c3f8c507a919a73d1389818ab3bde8"
+                    },
+                    data: {
+                        "commentID": cmt_id,
+                        "message": $("#message-reply").val()
+                    },
+                    success: function(response) {
+                        alert("You replied with content: " + $("#message-reply").val());
+                        location.reload();
+                    }
+                })
+            });
+        });
+    </script>
 {% endblock %}

@@ -99,7 +99,7 @@ class UserListView(LoginRequiredMixin, ListView):
     col = get_collection("feeds_van_users")
 
     def get_queryset(self):
-        queryset = self.col.find().sort("_id", -1)
+        queryset = self.col.find().sort("name", 1)
         return list(queryset)
 
 
@@ -116,10 +116,21 @@ class AdminView(LoginRequiredMixin, ListView):
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
-        print(form)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect("/managers")
+        return HttpResponseRedirect("/managers")
+
+
+def block_user(request):
+    user_id = request.GET["user_id"]
+    action = request.GET["action"]
+    col = get_collection("feeds_van_users")
+    user = col.find_one({"id": user_id})
+    if action == "block":
+        col.update_one(user, {"$set": {"sys_status": "block"}})
+    else:
+        col.update_one(user, {"$set": {"sys_status": "unblock"}})
+    return JsonResponse({"detail": "successful"}, status=200)
 
 
 """

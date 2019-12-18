@@ -58,6 +58,11 @@
                                     <div class="col-sm-7">
                                         {{ field }}
                                     </div>
+                                    {% if field.help_text %}
+                                        <div class="col-sm-12">
+                                            <small style="color: grey">{{ field.help_text }}</small>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             {% endfor %}
                             {{ form.non_field_errors }}
